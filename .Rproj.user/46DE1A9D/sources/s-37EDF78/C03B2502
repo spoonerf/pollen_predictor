@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1597845199970.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C03B2502",
+    "lastKnownWriteTime" : 1597858570,
+    "last_content_update" : 1597858570982,
+    "path" : "~/Documents/ECEHH/Pollen/pollen_predict/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "24,12",
+        "scrollLine" : "16"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
