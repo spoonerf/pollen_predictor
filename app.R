@@ -12,6 +12,8 @@ library(raster)
 library(PostcodesioR)
 library(rgdal)
 library(cplm)
+library(ggplot2)
+library(dplyr)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -69,10 +71,10 @@ ui <- fluidPage(
       
         ),
         
-        # Show a plot of the generated distribution
-        mainPanel(
-           textOutput("pollenScore")
+         mainPanel(
+             plotOutput("pollenPlot", width = "700px", height = "700px")
         )
+        
        
     )
 )
@@ -80,36 +82,45 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-     output$pollenScore <- renderPrint({
-           model <- readRDS("pollen_model.RDS")
-           grass <- raster("grass_grains_mean.tif")
-           
-           ll <- SpatialPoints(postcode_lookup(input$postcode)[,c("eastings", "northings")])
-           ggrm <- raster::extract(grass, ll, buffer = 5000, fun = mean)/cellStats(grass, mean)
-           
-           new_data <- data.frame(max_temp = input$max_temp, 
-                                  total_precip = input$total_precip,
-                                  mean_rel_hum = input$mean_rel_hum,
-                                  mean_tempq = input$mean_tempq,
-                                  heat_sum = input$heat_sum,
-                                  season = input$season,
-                                  mean_windsp = input$mean_windsp,
-                                  ggrm = ggrm)
-           
-           pollen <- round(predict(model, new_data), 2)
+
+     output$pollenPlot <- renderPlot({
          
-         if (pollen < 30){ print(paste0(pollen, " grams per cubic metre. Low risk of hayfever"))}
-           
-         if (pollen >= 30 & pollen <= 49){ print(paste0(pollen, " grams per cubic metre. Moderate risk of hayfever"))}
-           
-         if (pollen > 49 & pollen <= 149){ print(paste0(pollen, " grams per cubic metre. High risk of hayfever"))}
-          
-         if (pollen > 149){ print(paste0(pollen, " grams per cubic metre. Very high risk of hayfever"))}
-           
-       # print(paste0(pollen, " grams per cubic metre"))
-    })
-    
-   
+         model <- readRDS("pollen_model.RDS")
+         grass <- raster("grass_grains_mean.tif")
+         
+         ll <- SpatialPoints(postcode_lookup(input$postcode)[,c("eastings", "northings")])
+         ggrm <- raster::extract(grass, ll, buffer = 5000, fun = mean)/cellStats(grass, mean)
+         
+         new_data <- data.frame(max_temp = input$max_temp, 
+                                total_precip = input$total_precip,
+                                mean_rel_hum = input$mean_rel_hum,
+                                mean_tempq = input$mean_tempq,
+                                heat_sum = input$heat_sum,
+                                season = input$season,
+                                mean_windsp = input$mean_windsp,
+                                ggrm = ggrm)
+         
+         pollen <- round(predict(model, new_data), 2)
+
+         risk <- case_when( pollen < 30 ~ "Low risk of hayfever.",
+                             pollen >= 30 & pollen <= 49 ~ "Moderate risk of hayfever.",
+                            pollen >= 49 & pollen <= 149 ~ "High risk of hayfever.",
+                            pollen > 149 ~ "Very high risk of hayfever.")
+         n <- floor(pollen)
+         x <- runif(n, 0,1)
+         y <- runif(n, 0,1)
+         df <- data.frame(x,y)
+         ggplot(df, aes(x = x, y = y))+
+             geom_point(color = "orange", shape = 8)+
+             theme_void()+
+             ggtitle(paste0(pollen, " grams per cubic metre.\n ", risk))+
+             coord_equal()+
+             theme(plot.title = element_text(size = 20, face = "bold",hjust = 0.5),
+                   panel.border = element_rect(colour = "black", fill=NA, size=1))+
+             xlim(0,1)+
+             ylim(0,1)
+     })
+     
 }
 
 # Run the application 
