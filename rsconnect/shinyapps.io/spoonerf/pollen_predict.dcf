@@ -5,8 +5,8 @@ account: spoonerf
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2685563
-bundleId: 3534780
+bundleId: 3602183
 url: https://spoonerf.shinyapps.io/pollen_predict/
-when: 1597858610.42191
+when: 1599481216.82556
 asMultiple: FALSE
 asStatic: FALSE
